@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create(table: 'produits_primaires', callback: function (Blueprint $table) {
+            $table->id();
+            $table->string("nom");
+            $table->decimal("quantite", 8, 2)->unsigned();
+            $table->decimal("prix_achat", 10, 2)->unsigned();
+            $table->decimal("prix_vente", 10, 2)->unsigned();
+            $table->date("date_achat")->nullable();
+            $table->date("date_recolte")->nullable();
+            $table->string("categorie");
+            $table->string("origine")->nullable();
+            $table->unsignedInteger("duree_conservation")->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('produits_primaires');
+    }
+};
