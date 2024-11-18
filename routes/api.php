@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommandeController;
+use App\Http\Controllers\EvenementController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MachineController;
@@ -60,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Resources
     Route::resource('commande', CommandeController::class);
+    Route::resource('evenement', EvenementController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::resource('fournisseur', FournisseurController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::resource('location', LocationController::class);
     Route::resource('machine', MachineController::class);
