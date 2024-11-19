@@ -16,25 +16,25 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Insert user
-        DB::table('users')->insert([
-            'role_id' => 1,
-            'nom' => 'Admin User',
-            'adresse' => '123 Admin Street',
-            'tel' => '1234567890',
-            'societe' => 'Admin Corp',
-            'notes' => 'This is an admin user.',
-            'solde' => null,
-            'type' => null,
-            'nifstat' => null,
-            'photo' => '/images/default.png',
-            'email' => 'admin@example.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => \Illuminate\Support\Str::random(10),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // DB::table('users')->insert([
+        //     'role_id' => 1,
+        //     'nom' => 'Admin User',
+        //     'adresse' => '123 Admin Street',
+        //     'tel' => '1234567890',
+        //     'societe' => 'Admin Corp',
+        //     'notes' => 'This is an admin user.',
+        //     'solde' => null,
+        //     'type' => null,
+        //     'nifstat' => null,
+        //     'photo' => '/images/default.png',
+        //     'email' => 'admin@example.com',
+        //     'email_verified_at' => now(),
+        //     'password' => Hash::make('password'),
+        //     'remember_token' => \Illuminate\Support\Str::random(10),
+        //     'created_at' => now(),
+        //     'updated_at' => now(),
+        // ]);
 
-        User::factory(25)->create();
+        User::factory(200)->create();
     }
 }

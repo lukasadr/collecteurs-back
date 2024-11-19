@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\EvenementController;
 use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\ItineraireController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MachineController;
 use App\Http\Controllers\MouvementController;
@@ -54,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //User
     Route::post('/users/{id}', [UserController::class, 'update']);
     Route::get('/users-all', [UserController::class, 'indexAll']);
+    Route::post('/import-users', [UserController::class, 'importUsers']);
 
     //Fournisseur
     Route::post('/fournisseur/{id}', [FournisseurController::class, 'update']);
@@ -61,8 +63,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Resources
     Route::resource('commande', CommandeController::class);
-    Route::resource('evenement', EvenementController::class)->only(['index', 'store', 'show', 'destroy']);
+    Route::resource('evenement', EvenementController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('fournisseur', FournisseurController::class)->only(['index', 'store', 'show', 'destroy']);
+    Route::resource('itineraire', ItineraireController::class)->only(['index', 'store', 'destroy']);
     Route::resource('location', LocationController::class);
     Route::resource('machine', MachineController::class);
     Route::resource('mouvement', MouvementController::class);

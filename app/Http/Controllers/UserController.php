@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -167,4 +168,39 @@ class UserController extends Controller
 
         return response()->json($users);
     }
+
+    public function importUsers (Request $request) {
+        $usersData = $request->all();
+
+        foreach ($usersData as $userData) {
+            $validator = Validator::make($userData, [
+                'nom' => 'required|string|max:255',
+                'email' => 'required|unique:users,email',
+                'adresse' => 'required',
+                'tel' => 'required|unique:users,tel',
+                'societe' => 'nullable|string',
+                'notes' => 'nullable|string',
+                'solde' => 'nullable|numeric|min:0',
+                'type' => 'string',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'nifstat' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $userData['password'] = Hash::make('password');
+            $userData['role_id'] = 2;
+
+            User::create($userData);
+
+            $users = User::where('role_id', 2)->get();
+        }
+
+        return response()->json($users, 201);
+    }
+
 }
