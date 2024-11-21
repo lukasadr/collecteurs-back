@@ -46,11 +46,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mouvement-primaire/{id}', [ProduitPrimaireController::class, 'mouvementsProduit']);
     Route::post('/traiter/{id}', [ProduitPrimaireController::class, 'traiter']);
     Route::post('/produit-primaire/{id}', [ProduitPrimaireController::class, 'update']);
+    Route::get('/produit-primaire/categorie/{categorie}', [ProduitPrimaireController::class, 'categorieProduit']);
 
     //Produit Secondaire
     Route::get('/mouvement-secondaire', [ProduitSecondaireController::class, 'indexMouvements']);
     Route::get('/mouvement-secondaire/{id}', [ProduitSecondaireController::class, 'mouvementsProduit']);
     Route::post('/produit-secondaire/{id}', [ProduitSecondaireController::class, 'update']);
+    Route::get('/produit-secondaire/categorie/{categorie}', [ProduitSecondaireController::class, 'categorieProduit']);
 
     //User
     Route::post('/users/{id}', [UserController::class, 'update']);

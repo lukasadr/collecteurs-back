@@ -197,4 +197,18 @@ class ProduitPrimaireController extends Controller
 
         return response()->json($mouvements);
     }
+
+    public function categorieProduit($categorie)
+    {
+        if(in_array(needle: $categorie, haystack: ['alimentaire', 'industriel', 'elevage']))
+        {
+            $produits = ProduitPrimaire::with(relations: 'images')->where(column: 'categorie', operator: ucfirst(string: $categorie))->get();
+        }
+        else
+        {
+            return response()->json(data: ['message' => 'Catégorie non trouvée'], status: 404);
+        }
+
+        return response()->json(data: $produits);
+    }
 }
