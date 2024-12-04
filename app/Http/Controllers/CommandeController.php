@@ -18,7 +18,7 @@ class CommandeController extends Controller
      */
     public function index()
     {
-        $commandes = Commande::all();
+        $commandes = Commande::with('user')->get();
 
         return response()->json($commandes);
     }

@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-// Public
+// Public routes
 Route::post('/login', [AuthController::class, 'login']);
 
 // Authenticated routes
@@ -68,9 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('evenement', EvenementController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('fournisseur', FournisseurController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::resource('itineraire', ItineraireController::class)->only(['index', 'store', 'destroy']);
-    Route::resource('location', LocationController::class);
-    Route::resource('machine', MachineController::class);
-    Route::resource('mouvement', MouvementController::class);
+    Route::resource('mouvement', MouvementController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::resource('produit-primaire', ProduitPrimaireController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::resource('produit-secondaire', ProduitSecondaireController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::resource('users', UserController::class)->only(['index', 'store', 'show', 'destroy']);
