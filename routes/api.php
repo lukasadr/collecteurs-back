@@ -5,8 +5,6 @@ use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\EvenementController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\ItineraireController;
-use App\Http\Controllers\LocationController;
-use App\Http\Controllers\MachineController;
 use App\Http\Controllers\MouvementController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PanierController;
@@ -19,6 +17,11 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::get('/produit-primaire', [ProduitPrimaireController::class, 'index']);
+Route::get('/produit-secondaire', [ProduitSecondaireController::class, 'index']);
+Route::get('/produit-primaire/categorie/{categorie}', [ProduitPrimaireController::class, 'categorieProduit']);
+Route::get('/produit-secondaire/categorie/{categorie}', [ProduitSecondaireController::class, 'categorieProduit']);
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -31,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [CommandeController::class, 'dashboard']);
 
     // Cart
+    Route::post('/valider-panier', [CommandeController::class, 'validerPanier']);
     Route::get('/panier', [PanierController::class, 'getCart']);
     Route::post('/panier', [PanierController::class, 'ajouter']);
     Route::put('/panier', [PanierController::class, 'updateCart']);
@@ -46,13 +50,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mouvement-primaire/{id}', [ProduitPrimaireController::class, 'mouvementsProduit']);
     Route::post('/traiter/{id}', [ProduitPrimaireController::class, 'traiter']);
     Route::post('/produit-primaire/{id}', [ProduitPrimaireController::class, 'update']);
-    Route::get('/produit-primaire/categorie/{categorie}', [ProduitPrimaireController::class, 'categorieProduit']);
 
     //Produit Secondaire
     Route::get('/mouvement-secondaire', [ProduitSecondaireController::class, 'indexMouvements']);
     Route::get('/mouvement-secondaire/{id}', [ProduitSecondaireController::class, 'mouvementsProduit']);
     Route::post('/produit-secondaire/{id}', [ProduitSecondaireController::class, 'update']);
-    Route::get('/produit-secondaire/categorie/{categorie}', [ProduitSecondaireController::class, 'categorieProduit']);
 
     //User
     Route::post('/users/{id}', [UserController::class, 'update']);
@@ -63,13 +65,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/fournisseur/{id}', [FournisseurController::class, 'update']);
     Route::post('/fourniture', [FournisseurController::class, 'fournir']);
 
+    Route::post('/mobile-money', [ CommandeController::class, 'mobileMoney']);
+
+    Route::get('/commande-user/{id}', [CommandeController::class, 'commandeUser']);
+
     // Resources
     Route::resource('commande', CommandeController::class);
     Route::resource('evenement', EvenementController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('fournisseur', FournisseurController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::resource('itineraire', ItineraireController::class)->only(['index', 'store', 'destroy']);
     Route::resource('mouvement', MouvementController::class)->only(['index', 'store', 'show', 'destroy']);
-    Route::resource('produit-primaire', ProduitPrimaireController::class)->only(['index', 'store', 'show', 'destroy']);
-    Route::resource('produit-secondaire', ProduitSecondaireController::class)->only(['index', 'store', 'show', 'destroy']);
+    Route::resource('produit-primaire', ProduitPrimaireController::class)->only(['store', 'show', 'destroy']);
+    Route::resource('produit-secondaire', ProduitSecondaireController::class)->only(['store', 'show', 'destroy']);
     Route::resource('users', UserController::class)->only(['index', 'store', 'show', 'destroy']);
 });

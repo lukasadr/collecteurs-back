@@ -48,7 +48,7 @@ class ValidationCommande extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Un utlisateur vient d\'effectuer une commande'
+            'message' => 'Un client vient d\'effectuer une commande'
         ];
     }
 }

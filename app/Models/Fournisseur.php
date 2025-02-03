@@ -32,15 +32,18 @@ class Fournisseur extends Model
     public function getProduitsAttribute()
     {
         $produitsPrimaires = $this->produitsPrimaires->map(function($produit) {
+            $produit->source = 'primary';
             return $produit->load('images');
         });
 
         $produitsSecondaires = $this->produitsSecondaires->map(function($produit) {
+            $produit->source = 'secondary';
             return $produit->load('images');
         });
 
-        $produits = $produitsPrimaires->merge($produitsSecondaires);
-
-        return $produits;
+        return $produitsPrimaires->concat($produitsSecondaires)->unique(function ($item) {
+            return $item->id . $item->source;
+        });
     }
+
 }

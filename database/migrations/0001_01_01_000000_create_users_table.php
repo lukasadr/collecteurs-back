@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreign("role_id")->references("id")->on("roles")->onDelete("cascade");
             $table->string('nom');
             $table->string("adresse")->nullable();
-            $table->string("tel")->unique();
+            $table->string("tel")->unique()->nullable();
             $table->string("societe")->nullable();
             $table->text("notes")->nullable();
             $table->decimal("solde", 10, 2)->unsigned()->nullable();

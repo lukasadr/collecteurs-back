@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Commande;
-use App\Models\Contrat;
 use App\Models\MouvementStock;
 use App\Models\ProduitPrimaire;
 use App\Models\ProduitSecondaire;
 use App\Models\User;
 use App\Notifications\ValidationCommande;
 use Illuminate\Http\Request;
+use phpseclib3\Crypt\TripleDES;
+use DateTime;
 
 class CommandeController extends Controller
 {
@@ -37,9 +38,10 @@ class CommandeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|string|max:255',
+            'user_id' => 'required|integer|exists:users,id',
             'etat' => 'required|string|max:255',
             'date' => 'required|date',
+            'products' => 'required|array',
         ]);
 
         $commande = Commande::create([
@@ -48,8 +50,38 @@ class CommandeController extends Controller
             'date' => $validated['date'],
         ]);
 
+        foreach ($validated['products'] as $produit)
+        {
+            if ($produit['product_type'] == 'produit_primaire') {
+                $commande->produitsPrimaires()->attach($produit['product_id'], ['quantite' => $produit['quantity']]);
+                if($validated['etat'] == 'Payé')
+                {
+                    MouvementStock::createExit(
+                        produit: ProduitPrimaire::findOrFail($produit['product_id']),  
+                        quantite: $produit['quantity'], 
+                        source: "Client",  
+                        date: $validated['date']
+                    );
+                }
+            } else {
+                $commande->produitsSecondaires()->attach($produit['product_id'], ['quantite' => $produit['quantity']]);
+                if($validated['etat'] == 'Payé')
+                {
+                    MouvementStock::createExit(
+                        produit: ProduitSecondaire::findOrFail($produit['product_id']),  
+                        quantite: $produit['quantity'], 
+                        source: "Client",
+                        date: $validated['date']
+                    );
+                }
+            }
+        }
+
+        $commande->load('user');
+
         return response()->json($commande, 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -77,7 +109,7 @@ class CommandeController extends Controller
         $commande = Commande::findOrFail($id);
 
         $validated = $request->validate([
-            'user_id' => 'required|string|max:255',
+            'user_id' => 'required|integer|exists:users,id',
             'etat' => 'required|string|max:255',
             'date' => 'required|date',
         ]);
@@ -88,7 +120,9 @@ class CommandeController extends Controller
             'date' => $validated['date'],
         ]);
 
-        return response()->json(['Commande mise à jour']);
+        $commande->load('user');
+
+        return response()->json($commande);
     }
 
     /**
@@ -123,17 +157,74 @@ class CommandeController extends Controller
     public function dashboard()
     {
         $dashboardData = [
-            'ventes' => 0,
-            'entrees' => 0,
-            'sorties' => 0,
-            'contrats' => 0
+            'ventes' => Commande::where('etat', 'Payé')->count(),
+            'entrees' => MouvementStock::entrees()->count(),
+            'sorties' => MouvementStock::sorties()->count(),
+            'recette' => 0,
+            'lastSixMonthsVentes' => array_fill(0, 6, 0)
         ];
 
-        $dashboardData['ventes'] = Commande::where('etat', 'paye')->count();
-        $dashboardData['entrees'] = MouvementStock::entrees()->count();
-        $dashboardData['sorties'] = MouvementStock::sorties()->count();
-        $dashboardData['contrats'] = Contrat::count();
+        $commandesPaye = Commande::where('etat', 'Payé')->whereMonth('date', now()->month)->get();
+        foreach($commandesPaye as $commande)
+        {
+            $dashboardData['recette'] += $commande->montant;
+        }
+
+        for ($i = 0; $i < 6; $i++) {
+            $month = now()->subMonths($i)->month;
+            $dashboardData['lastSixMonthsVentes'][$i] = Commande::where('etat', 'Payé')->whereMonth('date', $month)->count();
+        }
 
         return response()->json($dashboardData);
+    }
+
+    public function validerPanier(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'produits' => 'required|array',
+        ]);
+
+        $commande = Commande::create([
+            'user_id' => $validated['user_id'],
+            'etat' => 'Payé',
+            'date' => now(),
+        ]);
+
+        foreach ($validated['produits'] as $produit)
+        {
+            if ($produit['produit_type'] == 'produit_primaire') {
+                $commande->produitsPrimaires()->attach($produit['produit_id'], ['quantite' => $produit['quantity']]);
+                MouvementStock::createExit(
+                    produit: ProduitPrimaire::findOrFail($produit['produit_id']),  
+                    quantite: $produit['quantity'], 
+                    source: "Client",  
+                    date: now()
+                );
+            } else {
+                $commande->produitsSecondaires()->attach($produit['produit_id'], ['quantite' => $produit['quantity']]);
+                MouvementStock::createExit(
+                    produit: ProduitSecondaire::findOrFail($produit['produit_id']),  
+                    quantite: $produit['quantity'], 
+                    source: "Client",
+                    date: now()
+                );
+            }
+        }
+
+        $admins = User::where('role_id', 1)->get();
+        foreach($admins as $admin)
+        {
+            $admin->notify(new ValidationCommande());
+        }
+
+        return response()->json($commande);
+    }
+
+    public function commandeUser($id)
+    {
+        $commandes = Commande::where('user_id', $id)->orderByDesc('date')->get();
+
+        return response()->json($commandes);
     }
 }

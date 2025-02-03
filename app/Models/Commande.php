@@ -49,8 +49,32 @@ class Commande extends Model
 
     public function getProduitsAttribute()
     {
-        return $this->produitsPrimaires()->get()->merge($this->produitsSecondaires()->get());
+        $primary = $this->produitsPrimaires()->get()->map(function ($item) {
+            $item->source = 'primary';
+            return $item;
+        });
+
+        $secondary = $this->produitsSecondaires()->get()->map(function ($item) {
+            $item->source = 'secondary';
+            return $item;
+        });
+
+        $combined = $primary->concat($secondary)->groupBy(function ($item) {
+            return $item->id . $item->source;
+        });
+
+        $summed = $combined->map(function ($group) {
+            $first = $group->first();
+            $first->pivot->quantite = $group->sum(function ($item) {
+                return $item->pivot->quantite;
+            });
+            return $first;
+        });
+
+        return $summed->values()->all(); // Convert the collection to an array
     }
+
+
 
     public function facture()
     {

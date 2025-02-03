@@ -100,7 +100,6 @@ class UserController extends Controller
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'required|string|min:8',
             'adresse' => 'required',
             'tel' => 'required|unique:users,tel,' . $user->id,
             'societe' => 'nullable|string',
@@ -130,7 +129,6 @@ class UserController extends Controller
         [
             'nom' => $validated['nom'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
             'adresse' => $validated['adresse'],
             'tel' => $validated['tel'],
             'societe' => $validated['societe'] ?? null,
